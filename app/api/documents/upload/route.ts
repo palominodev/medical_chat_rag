@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { processDocument, getDocumentStats } from "@/lib/pdf-processing";
+import { processAndEmbedDocument, getDocumentStats } from "@/lib/pdf-processing";
+import { saveDocument, saveChunksWithEmbeddings } from "@/lib/document-storage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,8 +36,8 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // 5. Procesar el PDF
-    const result = await processDocument(buffer);
+    // 5. Procesar el PDF y generar embeddings
+    const result = await processAndEmbedDocument(buffer);
     
     if (!result.success) {
       return NextResponse.json(
@@ -45,17 +46,56 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // 6. Obtener estadísticas
-    const stats = getDocumentStats(result);
+    // 6. Guardar documento en Supabase
+    const docResult = await saveDocument({
+      filename: file.name,
+      metadata: {
+        title: result.metadata.title,
+        author: result.metadata.author,
+        creationDate: result.metadata.creationDate,
+        totalPages: result.totalPages,
+        totalChunks: result.totalChunks
+      }
+    });
     
-    // 7. Retornar resultado exitoso
+    if (!docResult.success || !docResult.documentId) {
+      return NextResponse.json(
+        { error: docResult.error || "Error al guardar documento" },
+        { status: 500 }
+      );
+    }
+    
+    // 7. Guardar chunks con embeddings
+    const chunksResult = await saveChunksWithEmbeddings(
+      docResult.documentId,
+      result.chunks
+    );
+    
+    if (!chunksResult.success) {
+      return NextResponse.json(
+        { error: chunksResult.error || "Error al guardar chunks" },
+        { status: 500 }
+      );
+    }
+    
+    // 8. Obtener estadísticas
+    const stats = {
+      averageChunkSize: result.chunks.length > 0
+        ? Math.round(result.chunks.reduce((sum, c) => sum + c.content.length, 0) / result.chunks.length)
+        : 0,
+      totalCharacters: result.chunks.reduce((sum, c) => sum + c.content.length, 0),
+      embeddingDimensions: result.embeddingDimensions
+    };
+    
+    // 9. Retornar resultado exitoso
     return NextResponse.json({
       success: true,
       data: {
+        documentId: docResult.documentId,
         filename: file.name,
         totalPages: result.totalPages,
         totalChunks: result.totalChunks,
-        chunks: result.chunks,
+        savedChunks: chunksResult.savedCount,
         metadata: result.metadata,
         stats: stats
       }
@@ -69,10 +109,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
- 
-// Configurar para archivos grandes
-// export const config = {
-//   api: {
-//     bodyParser: false,
-//   },
-// };
+
+// Configurar tiempo máximo para procesamiento de PDFs grandes
+export const maxDuration = 60; // 60 segundos

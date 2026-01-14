@@ -5,11 +5,22 @@ import { MedicalFileUpload } from "@/components/view-medical-file/medical-file-u
 import { MedicalAssistantChat } from "@/components/medical-assistant-chat";
 import ViewMedicalFile from "@/components/view-medical-file/ViewMedicalFile";
 
+interface UploadedFileState {
+  url: string;
+  name: string;
+  documentId?: string;
+}
+
 export default function Home() {
-  const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string } | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFileState | null>(null);
 
   const handleFileUploaded = (file: File, url: string) => {
+    // Initial state without documentId (will be updated after processing)
     setUploadedFile({ url, name: file.name });
+  };
+
+  const handleProcessingComplete = (result: { documentId: string }) => {
+    setUploadedFile(prev => prev ? { ...prev, documentId: result.documentId } : null);
   };
 
   return (
@@ -19,11 +30,14 @@ export default function Home() {
         {uploadedFile ? (
           <ViewMedicalFile fileUrl={uploadedFile.url} fileName={uploadedFile.name} />
         ) : (
-          <MedicalFileUpload onFileUploaded={handleFileUploaded} />
+          <MedicalFileUpload
+            onFileUploaded={handleFileUploaded}
+            onProcessingComplete={handleProcessingComplete}
+          />
         )}
 
         {/* Right Panel - Chat */}
-        <MedicalAssistantChat />
+        <MedicalAssistantChat documentId={uploadedFile?.documentId ?? null} />
       </div>
     </div>
   );

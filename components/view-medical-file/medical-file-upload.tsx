@@ -17,6 +17,7 @@ interface ProcessedChunk {
 }
 
 interface ProcessingResult {
+	documentId: string; // [NEW] Added documentId
 	filename: string;
 	totalPages: number;
 	totalChunks: number;
