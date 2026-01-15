@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { processAndEmbedDocument, getDocumentStats } from "@/lib/pdf-processing";
 import { saveDocument, saveChunksWithEmbeddings, uploadFileToStorage } from "@/lib/document-storage";
 
@@ -56,8 +58,42 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // 5.5. Obtener el usuario autenticado
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              );
+            } catch {
+              // Ignorar error si se llama desde un Server Component
+            }
+          },
+        },
+      }
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401 }
+      );
+    }
     // 6. Guardar documento en Supabase
     const docResult = await saveDocument({
+      userId: user.id,
       filename: file.name,
       metadata: {
         title: result.metadata.title,
