@@ -65,16 +65,18 @@ export function MedicalAssistantChat({ documentId, sessionId, fileName }: Medica
 
 	return (
 		<Card className="flex flex-col border-slate-800 bg-slate-900/50 backdrop-blur-sm h-full">
-			<CardHeader className="pb-4 shrink-0">
-				<CardTitle className="flex items-center gap-2 text-xl text-slate-100">
-					<Bot className="h-5 w-5 text-blue-500" />
-					Asistente Médico
-				</CardTitle>
-			</CardHeader>
-			<Separator className="bg-slate-800 shrink-0" />
+			<div>
+				<CardHeader className="pb-4 shrink-0">
+					<CardTitle className="flex items-center gap-2 text-xl text-slate-100">
+						<Bot className="h-5 w-5 text-blue-500" />
+						Asistente Médico
+					</CardTitle>
+				</CardHeader>
+				<Separator className="bg-slate-800 shrink-0" />
+			</div>
 
 			{/* Messages Area */}
-			<ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
+			<ScrollArea className="p-4 h-full" ref={scrollAreaRef}>
 				{!documentId ? (
 					<div className="flex flex-col items-center justify-center h-full text-slate-400 gap-4 mt-10 opacity-60">
 						<div className="p-4 bg-slate-800/50 rounded-full">
@@ -153,27 +155,28 @@ export function MedicalAssistantChat({ documentId, sessionId, fileName }: Medica
 				)}
 			</ScrollArea>
 
-			<Separator className="bg-slate-800 shrink-0" />
-
-			{/* Input Area */}
-			<div className="p-4 shrink-0">
-				<div className="flex gap-3">
-					<Textarea
-						ref={textareaRef}
-						value={input}
-						onChange={(e) => setInput(e.target.value)}
-						onKeyDown={handleKeyDown}
-						placeholder={documentId ? "Escribe tu pregunta sobre el legajo médico..." : "Sube un documento primero..."}
-						disabled={!documentId || isLoading}
-						className="min-h-[60px] flex-1 resize-none border-slate-700 bg-slate-800/50 text-slate-200 placeholder:text-slate-500 focus-visible:ring-blue-500 disabled:opacity-50"
-					/>
-					<Button
-						onClick={handleSend}
-						disabled={!input.trim() || !documentId || isLoading}
-						className="h-auto bg-blue-600 px-4 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-500"
-					>
-						{isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-					</Button>
+			<div>
+				<Separator className="bg-slate-800 shrink-0" />
+				{/* Input Area */}
+				<div className="p-4 shrink-0">
+					<div className="flex gap-3">
+						<Textarea
+							ref={textareaRef}
+							value={input}
+							onChange={(e) => setInput(e.target.value)}
+							onKeyDown={handleKeyDown}
+							placeholder={documentId ? "Escribe tu pregunta sobre el legajo médico..." : "Sube un documento primero..."}
+							disabled={!documentId || isLoading}
+							className="min-h-[60px] flex-1 resize-none border-slate-700 bg-slate-800/50 text-slate-200 placeholder:text-slate-500 focus-visible:ring-blue-500 disabled:opacity-50"
+						/>
+						<Button
+							onClick={handleSend}
+							disabled={!input.trim() || !documentId || isLoading}
+							className="h-auto bg-blue-600 px-4 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-500"
+						>
+							{isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+						</Button>
+					</div>
 				</div>
 			</div>
 		</Card>

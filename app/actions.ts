@@ -89,7 +89,7 @@ export async function updateChatSessionTitle(sessionId: string, title: string) {
         .from('chat_sessions')
         .select('user_id')
         .eq('id', sessionId)
-        .single();
+        .maybeSingle();
         
     if (!session || session.user_id !== user.id) {
         throw new Error("Unauthorized");

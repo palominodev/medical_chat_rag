@@ -79,7 +79,7 @@ export async function getSessionById(
       .from("chat_sessions")
       .select("*")
       .eq("id", sessionId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error getting session:", error);

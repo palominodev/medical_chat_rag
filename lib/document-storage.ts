@@ -139,7 +139,7 @@ export async function getDocumentById(
       .from("medical_documents")
       .select("*")
       .eq("id", documentId)
-      .single();
+      .maybeSingle();
     
     if (error) {
       console.error("Error getting document:", error);
