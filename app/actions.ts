@@ -1,6 +1,5 @@
 'use server'
 
-import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
@@ -54,6 +53,7 @@ export async function getUserChats() {
   return chats;
 }
 
+
 export async function createNewChat() {
     const supabase = await createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -72,4 +72,28 @@ export async function createNewChat() {
     }
 
     return data;
+}
+
+import { updateSessionTitle } from "@/lib/chat-memory";
+
+export async function updateChatSessionTitle(sessionId: string, title: string) {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+        throw new Error("Unauthorized");
+    }
+
+    // Verify ownership
+    const { data: session } = await supabase
+        .from('chat_sessions')
+        .select('user_id')
+        .eq('id', sessionId)
+        .single();
+        
+    if (!session || session.user_id !== user.id) {
+        throw new Error("Unauthorized");
+    }
+
+    return await updateSessionTitle(sessionId, title);
 }

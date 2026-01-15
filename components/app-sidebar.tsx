@@ -1,16 +1,36 @@
-import * as React from "react"
+"use client"
 import {
 	Sidebar,
 	SidebarContent,
 	SidebarHeader,
 	SidebarRail,
 } from "@/components/ui/sidebar"
-import { NavChats } from "@/components/nav-chats"
-import { getUserChats } from "@/app/actions"
 
-export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-	const chats = await getUserChats()
-	console.log(chats)
+import { useEffect, useState } from "react"
+import { ChatSession } from "@/lib/supabase"
+import { getUserChats } from "@/app/actions"
+import { NavChats } from "./nav-chats"
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+	const [chats, setChats] = useState<ChatSession[]>([])
+
+	useEffect(() => {
+		const fetchChats = async () => {
+			const chats = await getUserChats()
+			setChats(chats)
+		}
+		fetchChats()
+
+		const handleSessionCreated = () => {
+			fetchChats()
+		}
+
+		window.addEventListener('chat-session-created', handleSessionCreated)
+
+		return () => {
+			window.removeEventListener('chat-session-created', handleSessionCreated)
+		}
+	}, [])
 
 	return (
 		<Sidebar collapsible="icon" {...props}>

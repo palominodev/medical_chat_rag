@@ -1,9 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { MessageSquare, Plus } from "lucide-react"
-import Link from "next/link"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { Plus } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import {
 	SidebarGroup,
@@ -11,11 +10,9 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	useSidebar,
 } from "@/components/ui/sidebar"
 import { ChatSession } from "@/lib/supabase"
 import { createNewChat } from "@/app/actions"
-import { Button } from "@/components/ui/button"
 import ItemMenu from "./ItemMenu"
 
 export function NavChats({
@@ -23,10 +20,7 @@ export function NavChats({
 }: {
 	chats: ChatSession[]
 }) {
-	const pathname = usePathname()
-	const searchParams = useSearchParams()
 	const router = useRouter()
-	const { isMobile } = useSidebar()
 	const [loading, setLoading] = React.useState(false)
 
 	const handleNewChat = async () => {

@@ -64,6 +64,7 @@ function HomeContent() {
         <MedicalAssistantChat
           documentId={uploadedFile?.documentId ?? null}
           sessionId={activeSessionId}
+          fileName={uploadedFile?.name}
         />
       </div>
     </div>

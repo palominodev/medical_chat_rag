@@ -10,12 +10,15 @@ import { Separator } from "@/components/ui/separator";
 import { useChatStream } from "@/hooks/use-chat-stream";
 import Markdown from "react-markdown";
 
+import { updateChatSessionTitle } from "@/app/actions";
+
 interface MedicalAssistantChatProps {
 	documentId: string | null;
 	sessionId?: string;
+	fileName?: string;
 }
 
-export function MedicalAssistantChat({ documentId, sessionId }: MedicalAssistantChatProps) {
+export function MedicalAssistantChat({ documentId, sessionId, fileName }: MedicalAssistantChatProps) {
 	const [input, setInput] = useState("");
 	const scrollAreaRef = useRef<HTMLDivElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -28,7 +31,13 @@ export function MedicalAssistantChat({ documentId, sessionId }: MedicalAssistant
 	} = useChatStream({
 		documentId,
 		initialSessionId: sessionId,
-		onSessionCreated: (id) => console.log("Session created:", id)
+		onSessionCreated: async (id) => {
+			console.log("Session created:", id);
+			if (fileName) {
+				await updateChatSessionTitle(id, fileName);
+				window.dispatchEvent(new CustomEvent('chat-session-created'));
+			}
+		}
 	});
 
 	// Auto-scroll to bottom when messages change
