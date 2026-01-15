@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processAndEmbedDocument, getDocumentStats } from "@/lib/pdf-processing";
-import { saveDocument, saveChunksWithEmbeddings } from "@/lib/document-storage";
+import { saveDocument, saveChunksWithEmbeddings, uploadFileToStorage } from "@/lib/document-storage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +35,16 @@ export async function POST(request: NextRequest) {
     // 4. Convertir File a Buffer
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    // 4.5. Subir archivo a Supabase Storage
+    const storagePath = await uploadFileToStorage(buffer, file.name);
+    
+    if (!storagePath) {
+      return NextResponse.json(
+        { error: "Error al subir el archivo al almacenamiento" },
+        { status: 500 }
+      );
+    }
     
     // 5. Procesar el PDF y generar embeddings
     const result = await processAndEmbedDocument(buffer);
@@ -54,7 +64,8 @@ export async function POST(request: NextRequest) {
         author: result.metadata.author,
         creationDate: result.metadata.creationDate,
         totalPages: result.totalPages,
-        totalChunks: result.totalChunks
+        totalChunks: result.totalChunks,
+        storagePath: storagePath
       }
     });
     

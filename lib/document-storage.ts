@@ -14,6 +14,7 @@ export interface SaveDocumentParams {
     creationDate?: string;
     totalPages?: number;
     totalChunks?: number;
+    storagePath?: string;
   };
 }
 
@@ -240,6 +241,45 @@ export async function getUserDocuments(
  * 
  * @returns Array de documentos
  */
+/**
+ * Sube un archivo al bucket 'files' de Supabase Storage
+ * 
+ * @param file - Archivo a subir (Buffer)
+ * @param filename - Nombre original del archivo
+ * @param contentType - Tipo de contenido (mimetype)
+ * @returns Path del archivo subido o null si hubo error
+ */
+export async function uploadFileToStorage(
+  file: Buffer,
+  filename: string,
+  contentType: string = 'application/pdf'
+): Promise<string | null> {
+  try {
+    // Generar un nombre único para evitar colisiones
+    const timestamp = Date.now();
+    const sanitizedFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const filePath = `documents/${timestamp}_${sanitizedFilename}`;
+
+    const { data, error } = await supabaseAdmin
+      .storage
+      .from('files')
+      .upload(filePath, file, {
+        contentType,
+        upsert: false
+      });
+
+    if (error) {
+      console.error("Error uploading file to storage:", error);
+      return null;
+    }
+
+    return data.path;
+  } catch (error) {
+    console.error("Error in uploadFileToStorage:", error);
+    return null;
+  }
+}
+
 export async function getAllDocuments(): Promise<MedicalDocument[]> {
   try {
     const { data, error } = await supabaseAdmin
