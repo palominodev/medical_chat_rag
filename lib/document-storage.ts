@@ -280,6 +280,34 @@ export async function uploadFileToStorage(
   }
 }
 
+
+/**
+ * Elimina un archivo del bucket 'files' de Supabase Storage
+ * 
+ * @param storagePath - Path del archivo en storage
+ * @returns true si se eliminó correctamente
+ */
+export async function deleteFileFromStorage(
+  storagePath: string
+): Promise<boolean> {
+  try {
+    const { error } = await supabaseAdmin
+      .storage
+      .from('files')
+      .remove([storagePath]);
+
+    if (error) {
+      console.error("Error deleting file from storage:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error in deleteFileFromStorage:", error);
+    return false;
+  }
+}
+
 export async function getAllDocuments(): Promise<MedicalDocument[]> {
   try {
     const { data, error } = await supabaseAdmin

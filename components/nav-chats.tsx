@@ -16,6 +16,7 @@ import {
 import { ChatSession } from "@/lib/supabase"
 import { createNewChat } from "@/app/actions"
 import { Button } from "@/components/ui/button"
+import ItemMenu from "./ItemMenu"
 
 export function NavChats({
 	chats,
@@ -64,14 +65,7 @@ export function NavChats({
 					</SidebarMenuButton>
 				</SidebarMenuItem>
 				{chats.map((chat) => (
-					<SidebarMenuItem key={chat.id}>
-						<SidebarMenuButton asChild isActive={pathname === "/" && searchParams.get('chatId') === chat.id}>
-							<Link href={`/?chatId=${chat.id}`}>
-								<MessageSquare className="opacity-60" />
-								<span>{chat.title || "Chat sin título"}</span>
-							</Link>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
+					<ItemMenu key={chat.id} chat={chat} />
 				))}
 			</SidebarMenu>
 		</SidebarGroup>
