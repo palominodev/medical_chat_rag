@@ -64,19 +64,19 @@ export function MedicalAssistantChat({ documentId, sessionId, fileName }: Medica
 	};
 
 	return (
-		<Card className="flex flex-col border-slate-800 bg-slate-900/50 backdrop-blur-sm h-full">
-			<div>
-				<CardHeader className="pb-4 shrink-0">
+		<Card className="flex flex-col border-slate-800 bg-slate-900/50 backdrop-blur-sm h-full min-h-0">
+			<div className="shrink-0">
+				<CardHeader className="pb-4">
 					<CardTitle className="flex items-center gap-2 text-xl text-slate-100">
 						<Bot className="h-5 w-5 text-blue-500" />
 						Asistente Médico
 					</CardTitle>
 				</CardHeader>
-				<Separator className="bg-slate-800 shrink-0" />
+				<Separator className="bg-slate-800" />
 			</div>
 
 			{/* Messages Area */}
-			<ScrollArea className="p-4 h-full" ref={scrollAreaRef}>
+			<ScrollArea className="flex-1 p-4 min-h-0" ref={scrollAreaRef}>
 				{!documentId ? (
 					<div className="flex flex-col items-center justify-center h-full text-slate-400 gap-4 mt-10 opacity-60">
 						<div className="p-4 bg-slate-800/50 rounded-full">
@@ -155,10 +155,10 @@ export function MedicalAssistantChat({ documentId, sessionId, fileName }: Medica
 				)}
 			</ScrollArea>
 
-			<div>
-				<Separator className="bg-slate-800 shrink-0" />
+			<div className="shrink-0">
+				<Separator className="bg-slate-800" />
 				{/* Input Area */}
-				<div className="p-4 shrink-0">
+				<div className="p-4">
 					<div className="flex gap-3">
 						<Textarea
 							ref={textareaRef}
