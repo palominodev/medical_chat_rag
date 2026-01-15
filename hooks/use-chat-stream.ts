@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export interface Message {
   id: string;
@@ -137,6 +137,31 @@ export function useChatStream({ documentId, initialSessionId, onSessionCreated }
       setIsLoading(false);
     }
   };
+
+  // Fetch existing chat history if initialSessionId is provided
+  useEffect(() => {
+    if (initialSessionId) {
+      const fetchHistory = async () => {
+        try {
+          setIsLoading(true);
+          const response = await fetch(`/api/chat/history/${initialSessionId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.messages && Array.isArray(data.messages)) {
+              setMessages(data.messages);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load chat history:", err);
+          setError("Failed to load chat history");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchHistory();
+    }
+  }, [initialSessionId]);
 
   return {
     messages,

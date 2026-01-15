@@ -12,9 +12,10 @@ import Markdown from "react-markdown";
 
 interface MedicalAssistantChatProps {
 	documentId: string | null;
+	sessionId?: string;
 }
 
-export function MedicalAssistantChat({ documentId }: MedicalAssistantChatProps) {
+export function MedicalAssistantChat({ documentId, sessionId }: MedicalAssistantChatProps) {
 	const [input, setInput] = useState("");
 	const scrollAreaRef = useRef<HTMLDivElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -26,6 +27,7 @@ export function MedicalAssistantChat({ documentId }: MedicalAssistantChatProps) 
 		error
 	} = useChatStream({
 		documentId,
+		initialSessionId: sessionId,
 		onSessionCreated: (id) => console.log("Session created:", id)
 	});
 

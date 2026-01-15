@@ -10,6 +10,7 @@ import { getUserChats } from "@/app/actions"
 
 export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const chats = await getUserChats()
+	console.log(chats)
 
 	return (
 		<Sidebar collapsible="icon" {...props}>

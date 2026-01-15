@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
+import { useRouter } from "next/navigation";
 import { Upload, CheckCircle2, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ interface MedicalFileUploadProps {
 type UploadStatus = "idle" | "uploading" | "processing" | "success" | "error";
 
 export function MedicalFileUpload({ onFileUploaded, onProcessingComplete }: MedicalFileUploadProps) {
+	const router = useRouter();
 	const [status, setStatus] = useState<UploadStatus>("idle");
 	const [progress, setProgress] = useState(0);
 	const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -108,6 +110,9 @@ export function MedicalFileUpload({ onFileUploaded, onProcessingComplete }: Medi
 				const url = URL.createObjectURL(file);
 				onFileUploaded?.(file, url);
 				onProcessingComplete?.(data.data);
+
+				// Refresh the UI to update the sidebar
+				router.refresh();
 
 			} catch (error) {
 				console.error("Error processing file:", error);

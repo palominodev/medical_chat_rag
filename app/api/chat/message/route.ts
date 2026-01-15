@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processChat, processChatStream } from "@/lib/chat-orchestrator";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +12,40 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Message and documentId are required" },
         { status: 400 }
+      );
+    }
+
+    // Obtener el usuario autenticado
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              );
+            } catch {
+              // Ignorar error si se llama desde un Server Component
+            }
+          },
+        },
+      }
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401 }
       );
     }
 
@@ -28,6 +64,10 @@ export async function POST(req: NextRequest) {
               message, 
               documentId, 
               sessionId,
+              {
+                userId: user.id,
+                title: "Nuevo Chat" // TODO: Generar título dinámico
+              },
               {
                 onSessionCreated: (newSessionId) => {
                   if (isFirstChunk) {
@@ -70,7 +110,10 @@ export async function POST(req: NextRequest) {
     
     // Modo Bloqueante (Standard JSON Response)
     else {
-      const result = await processChat(message, documentId, sessionId);
+      const result = await processChat(message, documentId, sessionId, {
+        userId: user.id,
+        title: "Nuevo Chat"
+      });
       
       return NextResponse.json({
         response: result.response,

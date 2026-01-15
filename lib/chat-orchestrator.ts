@@ -27,6 +27,8 @@ export interface ProcessChatResult {
 export interface ChatConfig {
   stream?: boolean;
   modelTemperature?: number;
+  userId?: string;
+  title?: string;
 }
 
 // ============================================
@@ -55,7 +57,11 @@ export async function processChat(
   // 1. Gestionar sesión
   let currentSessionId = sessionId;
   if (!currentSessionId) {
-    const sessionResult = await createChatSession(documentId);
+    const sessionResult = await createChatSession(
+      documentId, 
+      config?.userId, 
+      config?.title
+    );
     if (!sessionResult.success || !sessionResult.sessionId) {
       throw new Error("No se pudo crear la sesión de chat");
     }
@@ -110,6 +116,7 @@ export async function* processChatStream(
   message: string,
   documentId: string,
   sessionId?: string,
+  config?: ChatConfig,
   callbacks?: {
     onSessionCreated?: (sessionId: string) => void;
     onSourcesRetrieved?: (sources: RetrievedChunk[]) => void;
@@ -119,7 +126,11 @@ export async function* processChatStream(
   // 1. Gestionar sesión
   let currentSessionId = sessionId;
   if (!currentSessionId) {
-    const sessionResult = await createChatSession(documentId);
+    const sessionResult = await createChatSession(
+      documentId,
+      config?.userId,
+      config?.title
+    );
     if (!sessionResult.success || !sessionResult.sessionId) {
       throw new Error("No se pudo crear la sesión de chat");
     }
